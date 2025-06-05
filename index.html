@@ -1,0 +1,963 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐝 牛角瓜蜂場語音管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Taisho Gothic, '微軟正黑體', sans-serif;
+            background: linear-gradient(135deg, #FFA500 0%, #FF6B35 50%, #FF8C00 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6B35 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="30" cy="25" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="60" cy="15" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="2.5" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .voice-demo {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-demo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #FF8C00, #FF6B35, #4CAF50);
+        }
+
+        .voice-input {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .voice-button {
+            background: linear-gradient(135deg, #FF6B35, #FF8C00);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .voice-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .voice-button.recording {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .voice-text {
+            flex: 1;
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .voice-text.listening {
+            border-color: #FF6B35;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
+        }
+
+        .gap-form {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 5px rgba(255, 107, 53, 0.2);
+        }
+
+        .form-input.auto-filled {
+            background: #e8f5e8;
+            border-color: #4CAF50;
+        }
+
+        .timeline-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #FF8C00, #FF6B35, #4CAF50);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -37px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #FF6B35;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #FF6B35;
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .timeline-task {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .timeline-details {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FF6B35;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B35, #FF8C00);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        .notification.warning {
+            background: #f39c12;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .voice-input {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐝 牛角瓜蜂場語音管理系統</h1>
+            <p>智慧語音記錄 × GAP認證管理 × 專業蜂場系統</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 語音輸入區域 -->
+            <div class="demo-section">
+                <h2 class="section-title">
+                    🎤 語音記錄區域
+                </h2>
+                
+                <div class="voice-demo">
+                    <div class="voice-input">
+                        <button class="voice-button" id="voiceBtn">🎤</button>
+                        <div class="voice-text" id="voiceText">
+                            點擊麥克風開始語音記錄...
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="simulateVoiceInput('春繁')">
+                            🌸 模擬春繁記錄
+                        </button>
+                        <button class="btn btn-primary" onclick="simulateVoiceInput('分蜂')">
+                            👑 模擬分蜂記錄
+                        </button>
+                        <button class="btn btn-primary" onclick="simulateVoiceInput('採蜜')">
+                            🍯 模擬採蜜記錄
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAP表單區域 -->
+            <div class="demo-section">
+                <h2 class="section-title">
+                    📋 GAP 認證表單
+                </h2>
+                
+                <div class="gap-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">記錄日期</label>
+                            <input type="date" class="form-input" id="recordDate" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">農場名稱</label>
+                            <input type="text" class="form-input" id="farmName" value="許能原蜂場" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">生產者姓名</label>
+                            <input type="text" class="form-input" id="producerName" value="許能原" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">天氣狀況</label>
+                            <select class="form-input" id="weather">
+                                <option value="">請選擇</option>
+                                <option value="晴">☀️ 晴</option>
+                                <option value="雨">🌧️ 雨</option>
+                                <option value="陰">☁️ 陰</option>
+                                <option value="多雲">⛅ 多雲</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">蜂場位置與編號</label>
+                            <input type="text" class="form-input" id="location" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">作業項目</label>
+                            <input type="text" class="form-input" id="task" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">牛角瓜開花情況</label>
+                            <select class="form-input" id="flowering">
+                                <option value="">請選擇</option>
+                                <option value="無">無</option>
+                                <option value="少量">🌸 少量</option>
+                                <option value="中等">🌺 中等</option>
+                                <option value="大量">🌻 大量</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">採花跡象</label>
+                            <select class="form-input" id="foraging">
+                                <option value="">請選擇</option>
+                                <option value="是">✅ 是</option>
+                                <option value="否">❌ 否</option>
+                                <option value="不確定">❓ 不確定</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">資材名稱</label>
+                            <input type="text" class="form-input" id="material" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">使用量</label>
+                            <input type="text" class="form-input" id="quantity" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">採收量 (kg)</label>
+                            <input type="number" class="form-input" id="harvest" step="0.1" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">備註</label>
+                            <textarea class="form-input" id="notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="saveRecord()">
+                            💾 儲存記錄
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearForm()">
+                            🗑️ 清空表單
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 蜂場管理時間軸 -->
+            <div class="demo-section">
+                <h2 class="section-title">
+                    📅 蜂場管理時間軸
+                </h2>
+                
+                <div class="timeline-section">
+                    <div class="timeline" id="timeline">
+                        <!-- 時間軸項目將由 JavaScript 動態生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 統計資訊 -->
+            <div class="demo-section">
+                <h2 class="section-title">
+                    📊 蜂場統計資訊
+                </h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-number" id="totalRecords">0</div>
+                        <div class="stat-label">總記錄數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍯</div>
+                        <div class="stat-number" id="totalHoney">0</div>
+                        <div class="stat-label">總採收量 (kg)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏠</div>
+                        <div class="stat-number" id="activeAreas">0</div>
+                        <div class="stat-label">活躍區域</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌸</div>
+                        <div class="stat-number" id="currentSeason">春繁期</div>
+                        <div class="stat-label">當前季節</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知訊息 -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 蜂場管理系統 JavaScript
+        class BeekeepingVoiceSystem {
+            constructor() {
+                this.isRecording = false;
+                this.records = JSON.parse(localStorage.getItem('beekeepingRecords') || '[]');
+                this.currentSeason = this.getCurrentSeason();
+                
+                this.initializeSystem();
+                this.setupEventListeners();
+                this.loadData();
+            }
+
+            getCurrentSeason() {
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                const day = now.getDate();
+                
+                if ((month === 1 && day >= 20) || (month === 2) || (month === 3 && day <= 20)) {
+                    return '春繁期';
+                } else if ((month === 3 && day >= 21) || (month === 4) || (month === 5 && day <= 15)) {
+                    return '分蜂期';
+                } else if ((month === 5 && day >= 16) || month <= 8) {
+                    return '採蜜期';
+                } else if (month >= 9 && (month < 11 || (month === 11 && day <= 15))) {
+                    return '秋繁期';
+                } else {
+                    return '越冬期';
+                }
+            }
+
+            initializeSystem() {
+                // 設定今日日期
+                document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
+                
+                // 更新當前季節顯示
+                document.getElementById('currentSeason').textContent = this.currentSeason;
+                
+                // 初始化示範時間軸
+                this.initializeTimeline();
+            }
+
+            setupEventListeners() {
+                const voiceBtn = document.getElementById('voiceBtn');
+                voiceBtn.addEventListener('click', () => this.toggleRecording());
+            }
+
+            toggleRecording() {
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceText = document.getElementById('voiceText');
+                
+                if (!this.isRecording) {
+                    // 開始錄音
+                    this.isRecording = true;
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.textContent = '⏹️';
+                    voiceText.classList.add('listening');
+                    voiceText.textContent = '🎤 正在錄音中...';
+                    
+                    // 模擬錄音過程
+                    setTimeout(() => {
+                        this.stopRecording();
+                    }, 3000);
+                } else {
+                    this.stopRecording();
+                }
+            }
+
+            stopRecording() {
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceText = document.getElementById('voiceText');
+                
+                this.isRecording = false;
+                voiceBtn.classList.remove('recording');
+                voiceBtn.textContent = '🎤';
+                voiceText.classList.remove('listening');
+                
+                // 模擬語音處理
+                voiceText.textContent = '🔄 正在處理語音...';
+                
+                setTimeout(() => {
+                    const sampleText = '今天A區餵糖水，用了500毫升的糖水，天氣晴朗，牛角瓜開花情況中等';
+                    this.processVoiceInput(sampleText);
+                }, 2000);
+            }
+
+            processVoiceInput(transcript) {
+                const voiceText = document.getElementById('voiceText');
+                voiceText.textContent = `📝 "${transcript}"`;
+                
+                // 智慧解析語音內容
+                const parsedData = this.parseVoiceContent(transcript);
+                
+                // 自動填寫表單
+                this.fillForm(parsedData);
+                
+                // 顯示成功通知
+                this.showNotification('✅ 語音記錄已成功解析並填入表單！', 'success');
+            }
+
+            parseVoiceContent(text) {
+                const parsedData = {};
+                
+                // 解析天氣
+                if (text.includes('晴') || text.includes('好天氣')) {
+                    parsedData.weather = '晴';
+                } else if (text.includes('雨')) {
+                    parsedData.weather = '雨';
+                } else if (text.includes('陰')) {
+                    parsedData.weather = '陰';
+                } else if (text.includes('多雲')) {
+                    parsedData.weather = '多雲';
+                }
+                
+                // 解析區域
+                const areaMatch = text.match(/([ABC]區|\d+號)/);
+                if (areaMatch) {
+                    parsedData.location = areaMatch[0];
+                }
+                
+                // 解析作業項目
+                if (text.includes('餵糖水') || text.includes('餵食')) {
+                    parsedData.task = '餵糖水';
+                } else if (text.includes('分蜂')) {
+                    parsedData.task = '分蜂';
+                } else if (text.includes('採蜜') || text.includes('採收')) {
+                    parsedData.task = '採收';
+                } else if (text.includes('檢查') || text.includes('提脾')) {
+                    parsedData.task = '提脾檢查';
+                }
+                
+                // 解析牛角瓜開花情況
+                if (text.includes('盛開') || text.includes('很多') || text.includes('大量')) {
+                    parsedData.flowering = '大量';
+                } else if (text.includes('中等') || text.includes('普通')) {
+                    parsedData.flowering = '中等';
+                } else if (text.includes('少量') || text.includes('一點')) {
+                    parsedData.flowering = '少量';
+                }
+                
+                // 解析採花跡象
+                if (text.includes('採花') || text.includes('積極')) {
+                    parsedData.foraging = '是';
+                }
+                
+                // 解析資材和用量
+                const sugarMatch = text.match(/糖水.*?(\d+).*?(毫升|ml|公升|L)/i);
+                if (sugarMatch) {
+                    parsedData.material = '糖水';
+                    parsedData.quantity = f"{sugarMatch[1]}{sugarMatch[2]}";
+                }
+                
+                // 解析採收量
+                const harvestMatch = text.match(/(\d+\.?\d*)\s*(公斤|kg)/i);
+                if (harvestMatch) {
+                    parsedData.harvest = float(harvestMatch[1]);
+                }
+                
+                // 備註就是原始語音內容
+                parsedData.notes = text;
+                
+                return parsedData;
+            }
+
+            fillForm(data) {
+                Object.entries(data).forEach(([key, value]) => {
+                    const element = document.getElementById(key);
+                    if (element && value) {
+                        element.value = value;
+                        element.classList.add('auto-filled');
+                        setTimeout(() => element.classList.remove('auto-filled'), 3000);
+                    }
+                });
+            }
+
+            saveRecord() {
+                const record = {
+                    id: Date.now(),
+                    recordDate: document.getElementById('recordDate').value,
+                    farmName: document.getElementById('farmName').value,
+                    producerName: document.getElementById('producerName').value,
+                    weather: document.getElementById('weather').value,
+                    location: document.getElementById('location').value,
+                    task: document.getElementById('task').value,
+                    flowering: document.getElementById('flowering').value,
+                    foraging: document.getElementById('foraging').value,
+                    material: document.getElementById('material').value,
+                    quantity: document.getElementById('quantity').value,
+                    harvest: parseFloat(document.getElementById('harvest').value || 0),
+                    notes: document.getElementById('notes').value,
+                    createdAt: new Date().toISOString()
+                };
+
+                if (!record.recordDate || !record.task) {
+                    this.showNotification('❌ 請填寫記錄日期和作業項目', 'error');
+                    return;
+                }
+
+                this.records.push(record);
+                localStorage.setItem('beekeepingRecords', JSON.stringify(this.records));
+
+                this.updateTimeline();
+                this.updateStats();
+
+                this.showNotification('✅ 記錄已成功儲存！', 'success');
+
+                this.sendToBackend(record);
+            }
+
+            sendToBackend(record) {
+                console.log('發送記錄到後端系統:', record);
+                setTimeout(() => {
+                    this.showNotification('📤 資料已同步到GAP管理系統', 'success');
+                }, 1000);
+            }
+
+            clearForm() {
+                document.querySelectorAll('.form-input').forEach(input => {
+                    if (input.id !== 'recordDate' && input.id !== 'farmName' && input.id !== 'producerName') {
+                        input.value = '';
+                    }
+                });
+
+                this.showNotification('🗑️ 表單已清空', 'success');
+            }
+
+            loadData() {
+                this.updateTimeline();
+                this.updateStats();
+            }
+
+            updateTimeline() {
+                const timeline = document.getElementById('timeline');
+                timeline.innerHTML = '';
+                const recentRecords = this.records.slice(-10).reverse();
+                recentRecords.forEach(record => {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item';
+                    const date = new Date(record.recordDate).toLocaleDateString('zh-TW');
+                    const time = new Date(record.createdAt).toLocaleTimeString('zh-TW', {hour: '2-digit', minute: '2-digit'});
+                    timelineItem.innerHTML = `
+                        <div class="timeline-date">${date} ${time}</div>
+                        <div class="timeline-task">${this.getTaskIcon(record.task)} ${record.task}</div>
+                        <div class="timeline-details">
+                            ${record.location ? `📍 ${record.location}` : ''}
+                            ${record.weather ? `🌤️ ${record.weather}` : ''}
+                            ${record.flowering ? `🌺 牛角瓜: ${record.flowering}` : ''}
+                            ${record.harvest > 0 ? `🍯 採收: ${record.harvest}kg` : ''}
+                            ${record.material ? `🧪 ${record.material} ${record.quantity || ''}` : ''}
+                        </div>
+                        ${record.notes ? `<div class="timeline-details" style="margin-top: 10px; font-style: italic;">"${record.notes}"</div>` : ''}
+                    `;
+                    timeline.appendChild(timelineItem);
+                });
+                if (recentRecords.length === 0) {
+                    this.initializeTimeline();
+                }
+            }
+
+            initializeTimeline() {
+                const timeline = document.getElementById('timeline');
+                const sampleRecords = [
+                    {date: '2025-01-27', time: '08:30', task: '餵糖水', icon: '🍯', details: '📍 A區 🌤️ 晴 🧪 糖水 500ml', notes: '春繁期開始，蜂群活動增加'},
+                    {date: '2025-01-26', time: '15:20', task: '提脾檢查', icon: '🔍', details: '📍 B區 🌺 牛角瓜: 中等', notes: '發現新的王台，準備分蜂'},
+                    {date: '2025-01-25', time: '09:15', task: '採收', icon: '🍯', details: '📍 C區 🍯 採收: 12.5kg 🌺 牛角瓜: 大量', notes: '牛角瓜蜜源品質優良'},
+                    {date: '2025-01-24', time: '07:45', task: '分蜂', icon: '👑', details: '📍 A區 🌤️ 多雲', notes: '第8天檢查，5個王台發育良好'}
+                ];
+                timeline.innerHTML = '';
+                sampleRecords.forEach(record => {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item';
+                    timelineItem.innerHTML = `
+                        <div class="timeline-date">${record.date} ${record.time}</div>
+                        <div class="timeline-task">${record.icon} ${record.task}</div>
+                        <div class="timeline-details">${record.details}</div>
+                        <div class="timeline-details" style="margin-top: 10px; font-style: italic;">"${record.notes}"</div>
+                    `;
+                    timeline.appendChild(timelineItem);
+                });
+            }
+
+            updateStats() {
+                document.getElementById('totalRecords').textContent = this.records.length;
+                const totalHoney = this.records.reduce((sum, r) => sum + (r.harvest || 0), 0);
+                document.getElementById('totalHoney').textContent = totalHoney.toFixed(1);
+                const areas = new Set(this.records.map(r => r.location).filter(Boolean));
+                document.getElementById('activeAreas').textContent = areas.size;
+            }
+
+            getTaskIcon(task) {
+                const icons = {
+                    '餵糖水': '🍯',
+                    '分蜂': '👑',
+                    '育王': '👸',
+                    '提脾檢查': '🔍',
+                    '採收': '🍯',
+                    '清理': '🧹',
+                    '防治': '💊',
+                    '移箱': '📦'
+                };
+                return icons[task] || '⚡';
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                setTimeout(() => notification.classList.remove('show'), 3000);
+            }
+
+            simulateVoiceInput(type) {
+                const voiceText = document.getElementById('voiceText');
+                const sampleInputs = {
+                    '春繁': '今天A區開始春繁，餵了糖水500毫升，天氣晴朗，蜂群活動增加',
+                    '分蜂': '第八天檢查育王群，B區有五個王台發育良好，天氣多雲，準備分蜂',
+                    '採蜜': '今天C區採收蜂蜜15公斤，牛角瓜開花大量，蜜蜂採花很積極，品質很好'
+                };
+                const transcript = sampleInputs[type];
+                voiceText.textContent = '🔄 正在處理語音...';
+                setTimeout(() => this.processVoiceInput(transcript), 1500);
+            }
+        }
+
+        function simulateVoiceInput(type) { window.beekeepingSystem.simulateVoiceInput(type); }
+        function saveRecord() { window.beekeepingSystem.saveRecord(); }
+        function clearForm() { window.beekeepingSystem.clearForm(); }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.beekeepingSystem = new BeekeepingVoiceSystem();
+            showDailyReminder();
+        });
+
+        function showDailyReminder() {
+            const now = new Date();
+            const hour = now.getHours();
+            if (hour === 7) {
+                const currentSeason = window.beekeepingSystem.currentSeason;
+                const seasonTasks = {
+                    '春繁期': ['餵糖水', '蜂箱清理', '檢查蜂群強度'],
+                    '分蜂期': ['人工育王', '分蜂管理', '新王培育'],
+                    '採蜜期': ['蜜源管理', '牛角瓜監測', '採收作業'],
+                    '秋繁期': ['秋季繁殖', '儲備越冬', '蜂群整併'],
+                    '越冬期': ['保溫', '減少干擾', '監測存活']
+                };
+                const tasks = seasonTasks[currentSeason] || [];
+                const message = `🐝 今日蜂場任務
+🌸 ${currentSeason}
+⚡ ${tasks.join('、')}`;
+                setTimeout(() => { alert(message); }, 2000);
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                window.beekeepingSystem.toggleRecording();
+            }
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveRecord();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                clearForm();
+            }
+        });
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'zh-TW';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                window.beekeepingSystem.processVoiceInput(transcript);
+            };
+            recognition.onerror = function(event) {
+                console.error('語音識別錯誤:', event.error);
+                window.beekeepingSystem.showNotification('❌ 語音識別失敗，請重試', 'error');
+            };
+            window.beekeepingSystem.toggleRecording = function() {
+                if (!this.isRecording) {
+                    this.isRecording = true;
+                    const voiceBtn = document.getElementById('voiceBtn');
+                    const voiceText = document.getElementById('voiceText');
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.textContent = '⏹️';
+                    voiceText.classList.add('listening');
+                    voiceText.textContent = '🎤 請開始說話...';
+                    recognition.start();
+                } else {
+                    recognition.stop();
+                    this.stopRecording();
+                }
+            };
+            recognition.onend = function() { window.beekeepingSystem.stopRecording(); };
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(r) { console.log('ServiceWorker 註冊成功'); }).catch(function() { console.log('ServiceWorker 註冊失敗'); });
+            });
+        }
+
+        window.addEventListener('online', function() { window.beekeepingSystem.showNotification('🌐 網路已連線，正在同步資料...', 'success'); });
+        window.addEventListener('offline', function() { window.beekeepingSystem.showNotification('📱 目前離線模式，資料將在連線後同步', 'warning'); });
+    </script>
+</body>
+</html>
