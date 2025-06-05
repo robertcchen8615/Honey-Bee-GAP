@@ -24,3 +24,13 @@ For development you can use the `development` stage:
 docker build -t beekeeping-voice-system-dev --target development .
 docker run -p 3000:3000 beekeeping-voice-system-dev
 ```
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in your credentials before running the server locally.
+
+```bash
+cp .env.example .env
+```
+
+The application loads these values at startup using `dotenv`.
