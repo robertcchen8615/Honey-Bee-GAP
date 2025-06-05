@@ -115,6 +115,38 @@ async function transcribeAudio(audioBuffer) {
   }
 }
 
+// GAP 記錄驗證
+function validateGapRecord(record) {
+  const requiredFields = ['記錄日期', '農場名稱', '生產者姓名', '作業項目'];
+  const missingFields = [];
+
+  for (const field of requiredFields) {
+    if (!record[field]) {
+      missingFields.push(field);
+    }
+  }
+
+  if (record['作業項目'] === '採收' || record['作業項目']?.includes('採')) {
+    const honeyFields = ['採收量', '是否含牛角瓜蜜源', '水分含量是否已檢驗'];
+    for (const field of honeyFields) {
+      if (!record[field]) {
+        missingFields.push(field);
+      }
+    }
+  }
+
+  if (!record['農場名稱']) record['農場名稱'] = '許能原蜂場';
+  if (!record['生產者姓名']) record['生產者姓名'] = '許能原';
+  if (!record['作業人員']) record['作業人員'] = '許能原';
+
+  return {
+    ...record,
+    驗證狀態: missingFields.length === 0 ? '通過' : '需補充',
+    缺少欄位: missingFields,
+    處理時間: new Date().toISOString(),
+  };
+}
+
 // 智慧解析蜂場語音
 async function parseBeekeepingVoice(transcript, userId) {
   const currentDate = new Date().toISOString().split('T')[0];
@@ -707,6 +739,13 @@ async function handlePostback(event) {
     });
   }
 }
+
+// GAP 記錄驗證 Webhook
+app.post('/beekeeping-webhook', (req, res) => {
+  const record = req.body.data || req.body;
+  const result = validateGapRecord(record);
+  res.json(result);
+});
 
 // 每日任務推播 (可以用 cron job 觸發)
 app.get('/daily-reminder', async (req, res) => {
